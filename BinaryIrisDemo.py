@@ -30,10 +30,9 @@ data = np.loadtxt("BinaryIrisData.txt").astype(dtype=np.int32)
 accuracy_training = np.zeros(ensemble_size)
 accuracy_test = np.zeros(ensemble_size)
 
-for ensemble in xrange(ensemble_size):
-	print "ENSEMBLE", ensemble + 1
-	print 
-
+for ensemble in range(ensemble_size):
+	print("ENSEMBLE", ensemble + 1)
+	print()
 	np.random.shuffle(data)
 
 	X_training = data[:int(data.shape[0]*0.8),0:16] # Input features
@@ -52,6 +51,6 @@ for ensemble in xrange(ensemble_size):
 	accuracy_test[ensemble] = tsetlin_machine.evaluate(X_test, y_test, y_test.shape[0])
 	accuracy_training[ensemble] = tsetlin_machine.evaluate(X_training, y_training, y_training.shape[0])
 
-	print "Average accuracy on test data: %.1f +/- %.1f" % (np.mean(100*accuracy_test[:ensemble+1]), 1.96*np.std(100*accuracy_test[:ensemble+1])/np.sqrt(ensemble+1))
-	print "Average accuracy on training data: %.1f +/- %.1f" % (np.mean(100*accuracy_training[:ensemble+1]), 1.96*np.std(100*accuracy_training[:ensemble+1])/np.sqrt(ensemble+1))
-	print
+	print("Average accuracy on test data: %.1f +/- %.1f" % (np.mean(100 * accuracy_test[:ensemble + 1]), 1.96 * np.std(100 * accuracy_test[:ensemble + 1]) / np.sqrt(ensemble + 1)))
+	print("Average accuracy on training data: %.1f +/- %.1f" % (np.mean(100 * accuracy_training[:ensemble + 1]), 1.96 * np.std(100 * accuracy_training[:ensemble + 1]) / np.sqrt(ensemble + 1)))
+	print()

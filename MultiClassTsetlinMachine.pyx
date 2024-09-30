@@ -349,9 +349,10 @@ cdef class MultiClassTsetlinMachine:
 
 		Xi = np.zeros((self.number_of_features,), dtype=np.int32)
 	
-		random_index = np.arange(number_of_examples)
+		# random_index = np.arange(number_of_examples)
+		random_index = np.arange(number_of_examples, dtype=np.int32)  # Use int32 for 32-bit systems
 
-		for epoch in xrange(epochs):			
+		for epoch in xrange(epochs):
 			np.random.shuffle(random_index)
 
 			for i in xrange(number_of_examples):

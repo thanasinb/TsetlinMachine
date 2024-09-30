@@ -21,7 +21,7 @@ number_of_classes = 2
 epochs = 200
 
 # Loading of training and test data
-training_data = np.loadtxt("NoisyXORTrainingData.txt").astype(dtype=np.int32)
+training_data = np.loadtxt("Corrected_NoisyXORTrainingData.txt").astype(dtype=np.int32)
 test_data = np.loadtxt("NoisyXORTestData.txt").astype(dtype=np.int32)
 
 X_training = training_data[:,0:12] # Input features
@@ -38,12 +38,18 @@ tsetlin_machine.fit(X_training, y_training, y_training.shape[0], epochs=epochs)
 
 # Some performance statistics
 
-print "Accuracy on test data (no noise):", tsetlin_machine.evaluate(X_test, y_test, y_test.shape[0])
-print "Accuracy on training data (40% noise):", tsetlin_machine.evaluate(X_training, y_training, y_training.shape[0])
-print
-print "Prediction: x1 = 1, x2 = 0, ... -> y = ", tsetlin_machine.predict(np.array([1,0,1,1,1,0,1,1,1,0,0,0],dtype=np.int32))
-print "Prediction: x1 = 0, x2 = 1, ... -> y = ", tsetlin_machine.predict(np.array([0,1,1,1,1,0,1,1,1,0,0,0],dtype=np.int32))
-print "Prediction: x1 = 0, x2 = 0, ... -> y = ", tsetlin_machine.predict(np.array([0,0,1,1,1,0,1,1,1,0,0,0],dtype=np.int32))
-print "Prediction: x1 = 1, x2 = 1, ... -> y = ", tsetlin_machine.predict(np.array([1,1,1,1,1,0,1,1,1,0,0,0],dtype=np.int32))
+# print("Accuracy on test data (no noise):", tsetlin_machine.evaluate(X_test, y_test, y_test.shape[0]))
+# print("Accuracy on training data (40% noise):", tsetlin_machine.evaluate(X_training, y_training, y_training.shape[0]))
+print("Accuracy on test data:", tsetlin_machine.evaluate(X_test, y_test, y_test.shape[0]))
+print("Accuracy on training data:", tsetlin_machine.evaluate(X_training, y_training, y_training.shape[0]))
+print()
+print("Prediction: x1 = 1, x2 = 0, ... -> y = ",
+      tsetlin_machine.predict(np.array([1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0], dtype=np.int32)))
+print("Prediction: x1 = 0, x2 = 1, ... -> y = ",
+      tsetlin_machine.predict(np.array([0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0], dtype=np.int32)))
+print("Prediction: x1 = 0, x2 = 0, ... -> y = ",
+      tsetlin_machine.predict(np.array([0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0], dtype=np.int32)))
+print("Prediction: x1 = 1, x2 = 1, ... -> y = ",
+      tsetlin_machine.predict(np.array([1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0], dtype=np.int32)))
 
 
