@@ -27,6 +27,9 @@ import numpy as np
 cimport numpy as np
 import random
 from libc.stdlib cimport rand, RAND_MAX
+from memristor cimport Memristor
+import csv
+import os
 
 ########################################
 ### The Multiclass Tsetlin Machine #####
@@ -53,9 +56,29 @@ cdef class MultiClassTsetlinMachine:
 	cdef int threshold
 
 	cdef int boost_true_positive_feedback
-	
+
+	cdef Memristor[:,:,:] memristors
+	cdef float init_memristor_state
+	cdef float alpha_off
+	cdef float alpha_on
+	cdef float v_off
+	cdef float v_on
+	cdef float r_off
+	cdef float r_on
+	cdef float k_off
+	cdef float k_on
+	cdef float d
+	cdef float voltage
+	cdef float dt_off
+	cdef float dt_on
+
+	mycsv = {}
+	csvwriter = {}
+
 	# Initialization of the Tsetlin Machine
-	def __init__(self, number_of_classes, number_of_clauses, number_of_features, number_of_states, s, threshold, boost_true_positive_feedback = 0):
+	def __init__(self, number_of_classes, number_of_clauses, number_of_features, number_of_states, s, threshold,
+				 init_memristor_state, alpha_off, alpha_on, v_off, v_on, r_off, r_on, k_off, k_on, d,
+				 voltage, dt_off, dt_on, boost_true_positive_feedback = 0):
 		cdef int[:] target_indexes
 		cdef int c,i,j,m
 
@@ -65,6 +88,19 @@ cdef class MultiClassTsetlinMachine:
 		self.number_of_states = number_of_states
 		self.s = s
 		self.threshold = threshold
+		self.init_memristor_state = init_memristor_state
+		self.alpha_off = alpha_off
+		self.alpha_on = alpha_on
+		self.v_off = v_off
+		self.v_on = v_on
+		self.r_off = r_off
+		self.r_on = r_on
+		self.k_off = k_off
+		self.k_on = k_on
+		self.d = d
+		self.voltage = voltage
+		self.dt_off = dt_off
+		self.dt_on = dt_on
 		self.boost_true_positive_feedback = boost_true_positive_feedback
 
 		# The state of each Tsetlin Automaton is stored here. The automata are randomly initialized to either 'number_of_states' or 'number_of_states' + 1.
