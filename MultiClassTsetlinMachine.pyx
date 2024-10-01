@@ -106,6 +106,17 @@ cdef class MultiClassTsetlinMachine:
 		# The state of each Tsetlin Automaton is stored here. The automata are randomly initialized to either 'number_of_states' or 'number_of_states' + 1.
 		self.ta_state = np.random.choice([self.number_of_states, self.number_of_states+1], size=(self.number_of_clauses, self.number_of_features, 2)).astype(dtype=np.int32)
 
+		self.memristors = np.empty((self.number_of_clauses, self.number_of_features, 2), dtype=object)
+		for a in range(self.number_of_clauses):
+			for b in range(self.number_of_features):
+				for c in range(2):
+					self.memristors[a, b, c] = Memristor(self.ta_state[a, b, c], init_memristor_state, number_of_states,
+														 self.alpha_off, self.alpha_on,
+														 self.v_off, self.v_on,
+														 self.r_off, self.r_on,
+														 self.k_off, self.k_on,
+														 self.d, a, b, c)
+
 		# Data structures for keeping track of which clause refers to which class, and the sign of the clause
 		self.clause_count = np.zeros((self.number_of_classes,), dtype=np.int32)
 		self.clause_sign = np.zeros((self.number_of_classes, self.number_of_clauses/self.number_of_classes, 2), dtype=np.int32)
@@ -126,6 +137,69 @@ cdef class MultiClassTsetlinMachine:
 
 				self.clause_count[i] += 1
 
+		self.init_csv()
+
+	def print_ta_states(self):
+		"""
+		Print the values inside the ta_state ndarray.
+		"""
+		cdef int i, j, k
+		for i in range(self.ta_state.shape[0]):
+			for j in range(self.ta_state.shape[1]):
+				for k in range(self.ta_state.shape[2]):
+					print(f"ta_state[{i},{j},{k}] = {self.ta_state[i, j, k]}")
+		print(f"\n")
+
+	def print_memristor_states(self):
+		"""
+		Print the states of the memristor array.
+		"""
+		cdef int i, j, k
+		for i in range(self.memristors.shape[0]):
+			for j in range(self.memristors.shape[1]):
+				for k in range(self.memristors.shape[2]):
+					print(
+						f"memristors[{i},{j},{k}].state = {self.memristors[i, j, k].get_mr_state()}, {self.memristors[i, j, k].get_ta_state()}")
+		print(f"\n")
+
+	def init_csv(self):
+		cdef int i, j, k
+		cdef float mr_state, mr_dx, mr_x
+		for i in range(self.memristors.shape[0]):
+			for j in range(self.memristors.shape[1]):
+				for k in range(self.memristors.shape[2]):
+					if os.path.exists(f"memristor_{i}_{j}_{k}.csv"):
+						os.remove(f"memristor_{i}_{j}_{k}.csv")
+
+					with open(f"memristor_{i}_{j}_{k}.csv", 'w', newline='') as csvfile:
+						writer = csv.DictWriter(csvfile,
+												fieldnames=["TA State", "Memristor State", "Distance Shift",
+															"Final Distance"])
+						writer.writeheader()
+						csvfile.close()
+
+					self.mycsv[i, j, k] = open(f"memristor_{i}_{j}_{k}.csv", 'a', newline='')
+					self.csvwriter[i, j, k] = csv.writer(self.mycsv[i, j, k])
+					mr_ta_state, mr_state, mr_dx, mr_x = self.memristors[i, j, k].get_mr_xdx()
+					self.csvwriter[i, j, k].writerow([mr_ta_state, mr_state, mr_dx, mr_x])
+
+	def append_csv(self):
+		cdef int i, j, k, mr_ta_state
+		cdef float mr_state, mr_dx, mr_x
+		for i in range(self.memristors.shape[0]):
+			for j in range(self.memristors.shape[1]):
+				for k in range(self.memristors.shape[2]):
+					mr_ta_state, mr_state, mr_dx, mr_x = self.memristors[i, j, k].get_mr_xdx()
+					self.csvwriter[i, j, k].writerow([mr_ta_state, mr_state, mr_dx, mr_x])
+
+	def close_csv(self):
+		cdef int i, j, k, mr_ta_state
+		cdef float mr_state, mr_dx, mr_x
+		for i in range(self.memristors.shape[0]):
+			for j in range(self.memristors.shape[1]):
+				for k in range(self.memristors.shape[2]):
+					self.mycsv[i, j, k].close()
+
 	# Calculate the output of each clause using the actions of each Tsetline Automaton.
 	# Output is stored an internal output array.
 	cdef void calculate_clause_output(self, int[:] X, int predict=0):
@@ -137,8 +211,8 @@ cdef class MultiClassTsetlinMachine:
 			self.clause_output[j] = 1
 			all_exclude = 1
 			for k in xrange(self.number_of_features):
-				action_include = self.action(self.ta_state[j,k,0])
-				action_include_negated = self.action(self.ta_state[j,k,1])
+				action_include = self.action(self.memristors[j,k,0].get_ta_state())
+				action_include_negated = self.action(self.memristors[j,k,1].get_ta_state())
 
 				if action_include == 1 or action_include_negated == 1:
 					all_exclude = 0
@@ -209,7 +283,7 @@ cdef class MultiClassTsetlinMachine:
 
 	# Get the state of a specific automaton, indexed by clause, feature, and automaton type (include/include negated).
 	def get_state(self, int clause, int feature, int automaton_type):
-		return self.ta_state[clause,feature,automaton_type]
+		return self.memristors[clause,feature,automaton_type].get_ta_state()
 
 	############################################
 	### Evaluate the Trained Tsetlin Machine ###
@@ -329,32 +403,32 @@ cdef class MultiClassTsetlinMachine:
 				if self.clause_output[j] == 0:		
 					for k in xrange(self.number_of_features):	
 						if 1.0*rand()/RAND_MAX <= 1.0/self.s:								
-							if self.ta_state[j,k,0] > 1:
-								self.ta_state[j,k,0] -= 1
+							if self.memristors[j,k,0].get_ta_state() > 1:
+								self.memristors[j,k,0].tune(-self.voltage, self.dt_on)
 													
 						if 1.0*rand()/RAND_MAX <= 1.0/self.s:
-							if self.ta_state[j,k,1] > 1:
-								self.ta_state[j,k,1] -= 1
+							if self.memristors[j,k,1].get_ta_state() > 1:
+								self.memristors[j,k,1].tune(-self.voltage, self.dt_on)
 
 				elif self.clause_output[j] == 1:					
 					for k in xrange(self.number_of_features):
 						if X[k] == 1:
 							if self.boost_true_positive_feedback == 1 or 1.0*rand()/RAND_MAX <= (self.s-1)/self.s:
-								if self.ta_state[j,k,0] < self.number_of_states*2:
-									self.ta_state[j,k,0] += 1
+								if self.memristors[j,k,0].get_ta_state() < self.number_of_states*2:
+									self.memristors[j,k,0].tune(self.voltage, self.dt_off)
 
 							if 1.0*rand()/RAND_MAX <= 1.0/self.s:
-								if self.ta_state[j,k,1] > 1:
-									self.ta_state[j,k,1] -= 1
+								if self.memristors[j,k,1].get_ta_state() > 1:
+									self.memristors[j,k,1].tune(-self.voltage, self.dt_on)
 
 						elif X[k] == 0:
 							if self.boost_true_positive_feedback == 1 or 1.0*rand()/RAND_MAX <= (self.s-1)/self.s:
-								if self.ta_state[j,k,1] < self.number_of_states*2:
-									self.ta_state[j,k,1] += 1
+								if self.memristors[j,k,1].get_ta_state() < self.number_of_states*2:
+									self.memristors[j,k,1].tune(self.voltage, self.dt_off)
 
 							if 1.0*rand()/RAND_MAX <= 1.0/self.s:
-								if self.ta_state[j,k,0] > 1:
-									self.ta_state[j,k,0] -= 1
+								if self.memristors[j,k,0].get_ta_state() > 1:
+									self.memristors[j,k,0].tune(-self.voltage, self.dt_on)
 			
 			elif self.feedback_to_clauses[j] < 0:
 				#####################################################
@@ -362,15 +436,16 @@ cdef class MultiClassTsetlinMachine:
 				#####################################################
 				if self.clause_output[j] == 1:
 					for k in xrange(self.number_of_features):
-						action_include = self.action(self.ta_state[j,k,0])
-						action_include_negated = self.action(self.ta_state[j,k,1])
+						action_include = self.action(self.memristors[j,k,0].get_ta_state())
+						action_include_negated = self.action(self.memristors[j,k,1].get_ta_state())
 
 						if X[k] == 0:
-							if action_include == 0 and self.ta_state[j,k,0] < self.number_of_states*2:
-								self.ta_state[j,k,0] += 1
+							if action_include == 0 and self.memristors[j,k,0].get_ta_state() < self.number_of_states*2:
+								self.memristors[j,k,0].tune(self.voltage, self.dt_off)
 						elif X[k] == 1:
-							if action_include_negated == 0 and self.ta_state[j,k,1] < self.number_of_states*2:
-								self.ta_state[j,k,1] += 1
+							if action_include_negated == 0 and self.memristors[j,k,1].get_ta_state() < self.number_of_states*2:
+								self.memristors[j,k,1].tune(self.voltage, self.dt_off)
+		self.append_csv()
 
 	##############################################
 	### Batch Mode Training of Tsetlin Machine ###
