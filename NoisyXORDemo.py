@@ -10,11 +10,11 @@ import MultiClassTsetlinMachine
 # Parameters for the Tsetlin Machine
 T = 15 
 s = 3.9
-number_of_clauses = 20
+number_of_clauses = 8
 states = 100 
 
 # Parameters of the pattern recognition problem
-number_of_features = 12
+number_of_features = 2
 number_of_classes = 2
 
 # Training configuration
@@ -24,10 +24,10 @@ epochs = 200
 training_data = np.loadtxt("Corrected_NoisyXORTrainingData.txt").astype(dtype=np.int32)
 test_data = np.loadtxt("NoisyXORTestData.txt").astype(dtype=np.int32)
 
-X_training = training_data[:,0:12] # Input features
+X_training = training_data[:,0:2] # Input features
 y_training = training_data[:,12] # Target value
 
-X_test = test_data[:,0:12] # Input features
+X_test = test_data[:,0:2] # Input features
 y_test = test_data[:,12] # Target value
 
 # This is a multiclass variant of the Tsetlin Machine, capable of distinguishing between multiple classes
