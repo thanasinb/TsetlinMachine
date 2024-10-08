@@ -34,7 +34,7 @@ k_on = selected_params["k_on"]
 d = selected_params["d"]
 dt_off = d / (k_off * (((voltage / v_off) - 1) ** alpha_off))
 dt_on = d / (k_on * (((-voltage / v_on) - 1) ** alpha_on))
-dt = max(dt_off, -dt_on)/100
+dt = max(dt_off, -dt_on)/states
 
 print(f"dt_off = {dt_off}")
 print(f"dt_on = {dt_on}")
