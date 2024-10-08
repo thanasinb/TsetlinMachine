@@ -71,6 +71,7 @@ cdef class MultiClassTsetlinMachine:
 	cdef float voltage
 	cdef float dt_off
 	cdef float dt_on
+	cdef int save_csv
 
 	mycsv = {}
 	csvwriter = {}
@@ -78,7 +79,7 @@ cdef class MultiClassTsetlinMachine:
 	# Initialization of the Tsetlin Machine
 	def __init__(self, number_of_classes, number_of_clauses, number_of_features, number_of_states, s, threshold,
 				 init_memristor_state, alpha_off, alpha_on, v_off, v_on, r_off, r_on, k_off, k_on, d,
-				 voltage, dt_off, dt_on, boost_true_positive_feedback = 0):
+				 voltage, dt_off, dt_on, save_csv, boost_true_positive_feedback = 0):
 		cdef int[:] target_indexes
 		cdef int c,i,j,m
 
@@ -101,6 +102,7 @@ cdef class MultiClassTsetlinMachine:
 		self.voltage = voltage
 		self.dt_off = dt_off
 		self.dt_on = dt_on
+		self.save_csv = save_csv
 		self.boost_true_positive_feedback = boost_true_positive_feedback
 
 		# The state of each Tsetlin Automaton is stored here. The automata are randomly initialized to either 'number_of_states' or 'number_of_states' + 1.
@@ -137,7 +139,8 @@ cdef class MultiClassTsetlinMachine:
 
 				self.clause_count[i] += 1
 
-		self.init_csv()
+		if self.save_csv:
+			self.init_csv()
 
 	def print_ta_states(self):
 		"""
@@ -445,7 +448,9 @@ cdef class MultiClassTsetlinMachine:
 						elif X[k] == 1:
 							if action_include_negated == 0 and self.memristors[j,k,1].get_ta_state() < self.number_of_states*2:
 								self.memristors[j,k,1].tune(self.voltage, self.dt_off)
-		self.append_csv()
+
+		if self.save_csv:
+			self.append_csv()
 
 	##############################################
 	### Batch Mode Training of Tsetlin Machine ###
@@ -473,5 +478,9 @@ cdef class MultiClassTsetlinMachine:
 				for j in xrange(self.number_of_features):
 					Xi[j] = X[example_id,j]
 				self.update(Xi, target_class)
+
+		if self.save_csv:
+			self.close_csv()
+
 		return
 			
