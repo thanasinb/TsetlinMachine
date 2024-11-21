@@ -28,6 +28,7 @@ cdef class Memristor:
         elif voltage < self.v_on:
             self.dx = self.k_on * (((voltage/self.v_on) - 1) ** self.alpha_on) * dt
 
+        old_x = self.x
         self.x += self.dx
 
         if self.x > self.d:
@@ -37,6 +38,16 @@ cdef class Memristor:
             self.x = 0
 
         self.mr_state = self.x/self.d
+
+        new_ta_state = self.get_ta_state()
+        if new_ta_state > self.number_of_states*2:
+            self.mr_state = (ta_state / self.number_of_states) * self.init_memristor_state
+            self.x = self.mr_state * self.d
+
+            or new_ta_state < 1:
+            self.x = old_x
+            self.mr_state = self.x / self.d
+
         # print(self.mr_state, self.x, self.dx)
 
     def get_mr_state(self):

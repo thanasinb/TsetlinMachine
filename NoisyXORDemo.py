@@ -25,7 +25,7 @@ init_memristor_state = 0.5
 voltage = 1.2
 save_csv = False
 
-selected_params = vteam_params.get_vteam_params("Linear12")
+selected_params = vteam_params.get_vteam_params("Yalon2012")
 alpha_off = selected_params["alpha_off"]
 alpha_on = selected_params["alpha_on"]
 v_off = selected_params["v_off"]
@@ -62,6 +62,8 @@ tsetlin_machine.print_memristor_states()
 
 # Training of the Tsetlin Machine in batch mode. The Tsetlin Machine can also be trained online
 tsetlin_machine.fit(X_training, y_training, y_training.shape[0], epochs=epochs)
+
+tsetlin_machine.print_memristor_states()
 
 # Some performance statistics
 
