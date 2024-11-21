@@ -39,14 +39,14 @@ cdef class Memristor:
 
         self.mr_state = self.x/self.d
 
-        new_ta_state = self.get_ta_state()
-        if new_ta_state > self.number_of_states*2:
-            self.mr_state = (ta_state / self.number_of_states) * self.init_memristor_state
-            self.x = self.mr_state * self.d
-
-            or new_ta_state < 1:
-            self.x = old_x
-            self.mr_state = self.x / self.d
+        # new_ta_state = self.get_ta_state()
+        # if new_ta_state > self.number_of_states*2:
+        #     self.mr_state = (self.number_of_states*2 / self.number_of_states) * self.init_memristor_state
+        #     self.x = self.mr_state * self.d
+        #
+        # if new_ta_state < 1:
+        #     self.mr_state = (1 / self.number_of_states) * self.init_memristor_state
+        #     self.x = self.mr_state * self.d
 
         # print(self.mr_state, self.x, self.dx)
 
