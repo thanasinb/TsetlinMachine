@@ -12,7 +12,7 @@ import vteam_params
 T = 15 
 s = 3.9
 number_of_clauses = 20
-states = 100 
+number_of_states = 100
 
 # Parameters of the pattern recognition problem
 number_of_features = 12
@@ -35,7 +35,7 @@ k_on = selected_params["k_on"]
 d = selected_params["d"]
 dt_off = d / (k_off * (((voltage / v_off) - 1) ** alpha_off))
 dt_on = d / (k_on * (((-voltage / v_on) - 1) ** alpha_on))
-dt = max(dt_off, -dt_on)/states
+dt = max(dt_off, -dt_on)/number_of_states
 
 print(f"dt_off = {dt_off}")
 print(f"dt_on = {dt_on}")
@@ -52,7 +52,7 @@ X_test = test_data[:,0:12] # Input features
 y_test = test_data[:,12] # Target value
 
 # This is a multiclass variant of the Tsetlin Machine, capable of distinguishing between multiple classes
-tsetlin_machine = MultiClassTsetlinMachine.MultiClassTsetlinMachine(number_of_classes, number_of_clauses, number_of_features, states, s, T,
+tsetlin_machine = MultiClassTsetlinMachine.MultiClassTsetlinMachine(number_of_classes, number_of_clauses, number_of_features, number_of_states, s, T,
                                                                     init_memristor_state,
                                                                     alpha_off, alpha_on, v_off, v_on,
                                                                     selected_params["r_off"],
