@@ -13,7 +13,7 @@ T = 15
 s = 3.9
 number_of_clauses = 20
 number_of_states = 100
-# decision_threshold = number_of_states
+decision_threshold = number_of_states
 
 # Parameters of the pattern recognition problem
 number_of_features = 12
@@ -26,7 +26,7 @@ init_memristor_state = 0.5
 voltage = 1.2
 save_csv = False
 
-selected_params = vteam_params.get_vteam_params("Linear12")
+selected_params = vteam_params.get_vteam_params("Ho2017")
 alpha_off = selected_params["alpha_off"]
 alpha_on = selected_params["alpha_on"]
 v_off = selected_params["v_off"]
@@ -59,22 +59,14 @@ tsetlin_machine = MultiClassTsetlinMachine.MultiClassTsetlinMachine(number_of_cl
                                                                     selected_params["r_off"],
                                                                     selected_params["r_on"],
                                                                     k_off, k_on, d, voltage, dt, dt,
-                                                                    save_csv)
+                                                                    decision_threshold, save_csv)
 
-# tsetlin_machine = MultiClassTsetlinMachine.MultiClassTsetlinMachine(number_of_classes, number_of_clauses, number_of_features, number_of_states, s, T,
-#                                                                     init_memristor_state,
-#                                                                     alpha_off, alpha_on, v_off, v_on,
-#                                                                     selected_params["r_off"],
-#                                                                     selected_params["r_on"],
-#                                                                     k_off, k_on, d, voltage, dt, dt,
-#                                                                     decision_threshold, save_csv)
-
-tsetlin_machine.print_memristor_states()
+tsetlin_machine.print_memristor_states(False)
 
 # Training of the Tsetlin Machine in batch mode. The Tsetlin Machine can also be trained online
 tsetlin_machine.fit(X_training, y_training, y_training.shape[0], epochs=epochs)
 
-tsetlin_machine.print_memristor_states()
+tsetlin_machine.print_memristor_states(True)
 
 # Some performance statistics
 

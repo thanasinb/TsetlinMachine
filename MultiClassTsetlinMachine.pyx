@@ -41,7 +41,7 @@ cdef class MultiClassTsetlinMachine:
 	cdef int number_of_features
 	cdef float s
 	cdef int number_of_states
-	# cdef int decision_threshold
+	cdef int decision_threshold
 
 	cdef int[:,:,:] ta_state
 
@@ -79,11 +79,8 @@ cdef class MultiClassTsetlinMachine:
 
 	# Initialization of the Tsetlin Machine
 	def __init__(self, number_of_classes, number_of_clauses, number_of_features, number_of_states, s, threshold,
-				 init_memristor_state, alpha_off, alpha_on, v_off, v_on, r_off, r_on, k_off, k_on, d,
-				 voltage, dt_off, dt_on, save_csv, boost_true_positive_feedback = 0):
-	# def __init__(self, number_of_classes, number_of_clauses, number_of_features, number_of_states, s, threshold,
-	# 			init_memristor_state, alpha_off, alpha_on, v_off, v_on, r_off, r_on, k_off, k_on, d,
-	# 			voltage, dt_off, dt_on, decision_threshold, save_csv, boost_true_positive_feedback = 0):
+				init_memristor_state, alpha_off, alpha_on, v_off, v_on, r_off, r_on, k_off, k_on, d,
+				voltage, dt_off, dt_on, decision_threshold, save_csv, boost_true_positive_feedback = 0):
 
 		cdef int[:] target_indexes
 		cdef int c,i,j,m
@@ -92,7 +89,7 @@ cdef class MultiClassTsetlinMachine:
 		self.number_of_clauses = number_of_clauses
 		self.number_of_features = number_of_features
 		self.number_of_states = number_of_states
-		# self.decision_threshold = decision_threshold
+		self.decision_threshold = decision_threshold
 		self.s = s
 		self.threshold = threshold
 		self.init_memristor_state = init_memristor_state
@@ -159,7 +156,7 @@ cdef class MultiClassTsetlinMachine:
 					print(f"ta_state[{i},{j},{k}] = {self.ta_state[i, j, k]}")
 		print(f"\n")
 
-	def print_memristor_states(self):
+	def print_memristor_states(self, only_include):
 		"""
 		Print the states of the memristor array.
 		"""
@@ -167,8 +164,13 @@ cdef class MultiClassTsetlinMachine:
 		for i in range(self.memristors.shape[0]):
 			for j in range(self.memristors.shape[1]):
 				for k in range(self.memristors.shape[2]):
-					print(
-						f"memristors[{i},{j},{k}].state = {self.memristors[i, j, k].get_mr_state()}, {self.memristors[i, j, k].get_ta_state()}")
+					if (only_include):
+						if self.action(self.memristors[i, j, k].get_ta_state()):
+							print(
+								f"memristors[{i},{j},{k}].state = {self.memristors[i, j, k].get_mr_state()}, {self.memristors[i, j, k].get_ta_state()}")
+					else:
+						print(
+							f"memristors[{i},{j},{k}].state = {self.memristors[i, j, k].get_mr_state()}, {self.memristors[i, j, k].get_ta_state()}")
 		print(f"\n")
 
 	def init_csv(self):
@@ -285,8 +287,7 @@ cdef class MultiClassTsetlinMachine:
 
 	# Translates automata state to action 
 	cdef int action(self, int state):
-		if state <= self.number_of_states:
-		# if state <= self.decision_threshold:
+		if state <= self.decision_threshold:
 			return 0
 		else:
 			return 1
