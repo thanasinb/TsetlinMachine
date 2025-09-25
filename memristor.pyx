@@ -26,7 +26,7 @@ cdef class Memristor:
         if voltage > self.v_off:
             self.dx = self.k_off * (((voltage/self.v_off) - 1) ** self.alpha_off) * dt
         elif voltage < self.v_on:
-            self.dx = self.k_on * (((voltage/self.v_on) - 1) ** self.alpha_on) * dt
+            self.dx = self.k_on * (((-voltage/self.v_on) - 1) ** self.alpha_on) * dt
 
         self.x += self.dx
 

@@ -33,13 +33,13 @@ v_on = selected_params["v_on"]
 k_off = selected_params["k_off"]
 k_on = selected_params["k_on"]
 d = selected_params["d"]
-dt_off = d / (k_off * (((voltage / v_off) - 1) ** alpha_off))
-dt_on = d / (k_on * (((-voltage / v_on) - 1) ** alpha_on))
-dt = max(dt_off, -dt_on)/number_of_states
+dt_off = (d / (k_off * (((voltage / v_off) - 1) ** alpha_off)))/100
+dt_on = (d / (k_on * (((-voltage / v_on) - 1) ** alpha_on)))/100
+# dt = max(dt_off, -dt_on)/number_of_states
 
 print(f"dt_off = {dt_off}")
 print(f"dt_on = {dt_on}")
-print(f"dt = {dt}\n")
+# print(f"dt = {dt}\n")
 
 # Loading of training and test data
 training_data = np.loadtxt("Corrected_NoisyXORTrainingData.txt").astype(dtype=np.int32)
@@ -57,13 +57,14 @@ tsetlin_machine = MultiClassTsetlinMachine.MultiClassTsetlinMachine(number_of_cl
                                                                     alpha_off, alpha_on, v_off, v_on,
                                                                     selected_params["r_off"],
                                                                     selected_params["r_on"],
-                                                                    k_off, k_on, d, voltage, dt, dt, save_csv)
+                                                                    k_off, k_on, d, voltage, dt_off, dt_on, save_csv)
 tsetlin_machine.print_memristor_states()
 
 # Training of the Tsetlin Machine in batch mode. The Tsetlin Machine can also be trained online
 tsetlin_machine.fit(X_training, y_training, y_training.shape[0], epochs=epochs)
 
 # Some performance statistics
+tsetlin_machine.print_memristor_states()
 
 # print("Accuracy on test data (no noise):", tsetlin_machine.evaluate(X_test, y_test, y_test.shape[0]))
 # print("Accuracy on training data (40% noise):", tsetlin_machine.evaluate(X_training, y_training, y_training.shape[0]))

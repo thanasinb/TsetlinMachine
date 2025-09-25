@@ -407,11 +407,11 @@ cdef class MultiClassTsetlinMachine:
 					for k in xrange(self.number_of_features):	
 						if 1.0*rand()/RAND_MAX <= 1.0/self.s:								
 							if self.memristors[j,k,0].get_ta_state() > 1:
-								self.memristors[j,k,0].tune(-self.voltage, self.dt_on)
+								self.memristors[j,k,0].tune(self.voltage, self.dt_on)
 													
 						if 1.0*rand()/RAND_MAX <= 1.0/self.s:
 							if self.memristors[j,k,1].get_ta_state() > 1:
-								self.memristors[j,k,1].tune(-self.voltage, self.dt_on)
+								self.memristors[j,k,1].tune(self.voltage, self.dt_on)
 
 				elif self.clause_output[j] == 1:					
 					for k in xrange(self.number_of_features):
@@ -422,7 +422,7 @@ cdef class MultiClassTsetlinMachine:
 
 							if 1.0*rand()/RAND_MAX <= 1.0/self.s:
 								if self.memristors[j,k,1].get_ta_state() > 1:
-									self.memristors[j,k,1].tune(-self.voltage, self.dt_on)
+									self.memristors[j,k,1].tune(self.voltage, self.dt_on)
 
 						elif X[k] == 0:
 							if self.boost_true_positive_feedback == 1 or 1.0*rand()/RAND_MAX <= (self.s-1)/self.s:
@@ -431,7 +431,7 @@ cdef class MultiClassTsetlinMachine:
 
 							if 1.0*rand()/RAND_MAX <= 1.0/self.s:
 								if self.memristors[j,k,0].get_ta_state() > 1:
-									self.memristors[j,k,0].tune(-self.voltage, self.dt_on)
+									self.memristors[j,k,0].tune(self.voltage, self.dt_on)
 			
 			elif self.feedback_to_clauses[j] < 0:
 				#####################################################
