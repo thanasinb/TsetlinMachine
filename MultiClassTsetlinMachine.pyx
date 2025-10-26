@@ -68,7 +68,8 @@ cdef class MultiClassTsetlinMachine:
 	cdef float k_off
 	cdef float k_on
 	cdef float d
-	cdef float voltage
+	cdef float voltage_off
+	cdef float voltage_on
 	cdef float dt_off
 	cdef float dt_on
 	cdef int save_csv
@@ -79,7 +80,7 @@ cdef class MultiClassTsetlinMachine:
 	# Initialization of the Tsetlin Machine
 	def __init__(self, number_of_classes, number_of_clauses, number_of_features, number_of_states, s, threshold,
 				 init_memristor_state, alpha_off, alpha_on, v_off, v_on, r_off, r_on, k_off, k_on, d,
-				 voltage, dt_off, dt_on, save_csv, boost_true_positive_feedback = 0):
+				 voltage_off, voltage_on, dt_off, dt_on, save_csv, boost_true_positive_feedback = 0):
 		cdef int[:] target_indexes
 		cdef int c,i,j,m
 
@@ -99,7 +100,8 @@ cdef class MultiClassTsetlinMachine:
 		self.k_off = k_off
 		self.k_on = k_on
 		self.d = d
-		self.voltage = voltage
+		self.voltage_off = voltage_off
+		self.voltage_on = voltage_on
 		self.dt_off = dt_off
 		self.dt_on = dt_on
 		self.save_csv = save_csv
@@ -407,31 +409,31 @@ cdef class MultiClassTsetlinMachine:
 					for k in xrange(self.number_of_features):	
 						if 1.0*rand()/RAND_MAX <= 1.0/self.s:								
 							if self.memristors[j,k,0].get_ta_state() > 1:
-								self.memristors[j,k,0].tune(-self.voltage, self.dt_on)
+								self.memristors[j,k,0].tune(-self.voltage_on, self.dt_on)
 													
 						if 1.0*rand()/RAND_MAX <= 1.0/self.s:
 							if self.memristors[j,k,1].get_ta_state() > 1:
-								self.memristors[j,k,1].tune(-self.voltage, self.dt_on)
+								self.memristors[j,k,1].tune(-self.voltage_on, self.dt_on)
 
 				elif self.clause_output[j] == 1:					
 					for k in xrange(self.number_of_features):
 						if X[k] == 1:
 							if self.boost_true_positive_feedback == 1 or 1.0*rand()/RAND_MAX <= (self.s-1)/self.s:
 								if self.memristors[j,k,0].get_ta_state() < self.number_of_states*2:
-									self.memristors[j,k,0].tune(self.voltage, self.dt_off)
+									self.memristors[j,k,0].tune(self.voltage_off, self.dt_off)
 
 							if 1.0*rand()/RAND_MAX <= 1.0/self.s:
 								if self.memristors[j,k,1].get_ta_state() > 1:
-									self.memristors[j,k,1].tune(-self.voltage, self.dt_on)
+									self.memristors[j,k,1].tune(-self.voltage_on, self.dt_on)
 
 						elif X[k] == 0:
 							if self.boost_true_positive_feedback == 1 or 1.0*rand()/RAND_MAX <= (self.s-1)/self.s:
 								if self.memristors[j,k,1].get_ta_state() < self.number_of_states*2:
-									self.memristors[j,k,1].tune(self.voltage, self.dt_off)
+									self.memristors[j,k,1].tune(self.voltage_off, self.dt_off)
 
 							if 1.0*rand()/RAND_MAX <= 1.0/self.s:
 								if self.memristors[j,k,0].get_ta_state() > 1:
-									self.memristors[j,k,0].tune(-self.voltage, self.dt_on)
+									self.memristors[j,k,0].tune(-self.voltage_on, self.dt_on)
 			
 			elif self.feedback_to_clauses[j] < 0:
 				#####################################################
@@ -444,10 +446,10 @@ cdef class MultiClassTsetlinMachine:
 
 						if X[k] == 0:
 							if action_include == 0 and self.memristors[j,k,0].get_ta_state() < self.number_of_states*2:
-								self.memristors[j,k,0].tune(self.voltage, self.dt_off)
+								self.memristors[j,k,0].tune(self.voltage_off, self.dt_off)
 						elif X[k] == 1:
 							if action_include_negated == 0 and self.memristors[j,k,1].get_ta_state() < self.number_of_states*2:
-								self.memristors[j,k,1].tune(self.voltage, self.dt_off)
+								self.memristors[j,k,1].tune(self.voltage_off, self.dt_off)
 
 		if self.save_csv:
 			self.append_csv()

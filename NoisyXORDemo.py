@@ -22,7 +22,8 @@ number_of_classes = 2
 epochs = 200
 
 init_memristor_state = 0.5
-voltage = 1.2
+voltage_off = 1.2
+voltage_on = 1.2
 save_csv = False
 
 selected_params = vteam_params.get_vteam_params("Yalon2012")
@@ -33,8 +34,8 @@ v_on = selected_params["v_on"]
 k_off = selected_params["k_off"]
 k_on = selected_params["k_on"]
 d = selected_params["d"]
-dt_off = (d / (number_of_states * (k_off * (((voltage / v_off) - 1) ** alpha_off))))
-dt_on = -(d / (number_of_states * (k_on * (((-voltage / v_on) - 1) ** alpha_on))))
+dt_off = (d / (number_of_states * (k_off * (((voltage_off / v_off) - 1) ** alpha_off))))
+dt_on = -(d / (number_of_states * (k_on * (((-voltage_on / v_on) - 1) ** alpha_on))))
 # dt = max(dt_off, -dt_on)/number_of_states
 
 print(f"dt_off = {dt_off}")
@@ -57,7 +58,7 @@ tsetlin_machine = MultiClassTsetlinMachine.MultiClassTsetlinMachine(number_of_cl
                                                                     alpha_off, alpha_on, v_off, v_on,
                                                                     selected_params["r_off"],
                                                                     selected_params["r_on"],
-                                                                    k_off, k_on, d, voltage, dt_off, dt_on, save_csv)
+                                                                    k_off, k_on, d, voltage_off, voltage_on, dt_off, dt_on, save_csv)
 # tsetlin_machine.print_memristor_states()
 
 # Training of the Tsetlin Machine in batch mode. The Tsetlin Machine can also be trained online
